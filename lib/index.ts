@@ -1,16 +1,14 @@
 import Layer from "./layers/layer";
 import CommonLayer, { CommonLayerOption } from "./layers/common";
-import AccLayer from "./layers/acc"
+import AccLayer from "./layers/acc";
 import { enqueue, addListener, removeListener } from "./queue";
 
 export interface DanmuItem {
-    type?: "common" | "fixed" | "acc";
     content?: string;
     forceDetect?: boolean;
     render?: ((any) => HTMLElement) | HTMLElement | string;
     className?: string;
     style?: string;
-    acceleration?: number;
     trace?: number;
     duration?: number;
 }
@@ -24,17 +22,21 @@ function toDanmuItem(danmu: string | DanmuItem): DanmuItem {
 export class DanmuManager {
     private layers: Layer[] = [];
     private status: 0 | 1 | 2; // 枚举？ 0: 停止  1 运行  2 暂停
-    constructor(container: HTMLElement) {
-        this.layers.push(new CommonLayer(container));
-        this.layers.push(new AccLayer(container));
+
+    constructor() {
         this.batch = this.batch.bind(this);
     }
 
     private batch(data: DanmuItem[]) {
         // 改进批量
         data.forEach(d => {
-            const layer = this.layers.find(l => l.type === (d.type || "common"));
-            layer.send([d]);
+            const layer =
+                this.layers.find(l => d.duration === (l as CommonLayer).option.duration) ||
+                this.layers[0];
+
+            if (layer) {
+                layer.send([d]);
+            }
         });
     }
 
@@ -52,8 +54,17 @@ export class DanmuManager {
         enqueue(contents);
     }
 
-    init(option?: CommonLayerOption) {
-        this.layers.forEach(l => l.init(option));
+    init(container: HTMLElement, option?: CommonLayerOption[]) {
+        let optionArr = option;
+        if (!Array.isArray(option)) {
+            optionArr = [option];
+        }
+
+        optionArr.forEach(opt => {
+            const layer = new CommonLayer(container);
+            layer.init(opt);
+            this.layers.push(layer);
+        });
     }
 
     start() {
@@ -77,9 +88,9 @@ export class DanmuManager {
     pause() {
         if (this.status !== 1) {
             return;
-        }    
+        }
         this.layers.forEach(l => l.pause());
-        this.status = 2
+        this.status = 2;
     }
 
     continue() {
@@ -99,8 +110,8 @@ export class DanmuManager {
     }
 }
 
-function getDanmuManager(container: HTMLElement): DanmuManager {
-    return new DanmuManager(container);
+function getDanmuManager(): DanmuManager {
+    return new DanmuManager();
 }
 
 export default getDanmuManager;

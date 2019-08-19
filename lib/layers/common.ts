@@ -16,7 +16,7 @@ const DEFAULT_OPTION = {
     duration: 10000,
     checkPeriod: 1000,
     useMeasure: false,
-    slideRatio: 4
+    slideRatio: 4,
 };
 
 const DEFAULT_DANMU_CLASS = "danmu-item";
@@ -30,7 +30,7 @@ class CommonLayer extends Layer {
     private WIDTH: number;
     private animatingTime: number;
     private rect: ClientRect;
-    private option: CommonLayerOption;
+    public option: CommonLayerOption;
     private clearTicket: number;
     private pausedTime: number;
     private traceManager: TraceManager;
@@ -170,12 +170,17 @@ class CommonLayer extends Layer {
         this.traceManager.set(traceIndex, x, len);
     }
 
+
+    getFrame(){
+        return this.frame1.classList.contains("danmu-animation-1")? this.frame1 : this.frame2;
+    }
+
     send(queue: DanmuItem[]) {
         if (this.status !== 1 || queue.length <= 0) {
             return;
         }
 
-        const el = document.querySelector(".danmu-animation-1") as HTMLDivElement;
+        const el = this.getFrame();
         if (!el) {
             return;
         }
