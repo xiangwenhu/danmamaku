@@ -9,7 +9,7 @@
     height: 100%;
     position: absolute;
     will-change: transform;
-    opacity: 0.8;
+    /* opacity: 0.8; */
 }
 
 .slide-danmu .danmu-frame-common{

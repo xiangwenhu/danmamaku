@@ -9,6 +9,8 @@ export interface CommonLayerOption {
     checkPeriod?: number;
     useMeasure?: boolean;
     slideRatio?: number;
+    id?: number | string;
+    zIndex?: number;
 }
 
 const DEFAULT_OPTION = {
@@ -16,7 +18,7 @@ const DEFAULT_OPTION = {
     duration: 10000,
     checkPeriod: 1000,
     useMeasure: false,
-    slideRatio: 4,
+    slideRatio: 4
 };
 
 const DEFAULT_DANMU_CLASS = "danmu-item";
@@ -43,11 +45,15 @@ class CommonLayer extends Layer {
         this.HEIGHT = container.clientHeight;
         this.WIDTH = container.clientWidth;
         this.type = "common";
-    } 
+    }
 
     init(option: CommonLayerOption = DEFAULT_OPTION) {
+        if (option.id == null) {
+            option.id = Math.random();
+        }
+
         const { HEIGHT, WIDTH } = this;
-        this.option = Object.assign(DEFAULT_OPTION, option);
+        this.option = Object.assign({}, DEFAULT_OPTION, option);
         this.createFrames(this.container);
         this.recycle();
         const traceHeight = this.getTraceHeight(DEFAULT_DANMU_CLASS);
@@ -70,8 +76,8 @@ class CommonLayer extends Layer {
             width: (this.WIDTH * this.option.slideRatio) / 2,
             traceHeight
         });
-        this.frame2.style.animationDuration = option.duration * 2 + "ms";
-        this.frame1.style.animationDuration = option.duration * 2 + "ms";
+        this.frame2.style.animationDuration = (option.duration * option.slideRatio) / 2 + "ms";
+        this.frame1.style.animationDuration = (option.duration * option.slideRatio) / 2 + "ms";
         // TODO:: 计算
         this.animatingTime = Date.now();
 
@@ -79,7 +85,10 @@ class CommonLayer extends Layer {
     }
 
     start() {
-        if (this.frame1.classList.contains("danmu-animation-1")) {
+        if (
+            this.frame1.classList.contains("danmu-animation-1") ||
+            this.frame2.classList.contains("danmu-animation-1")
+        ) {
             console.log("already started...");
             return;
         }
@@ -170,9 +179,8 @@ class CommonLayer extends Layer {
         this.traceManager.set(traceIndex, x, len);
     }
 
-
-    getFrame(){
-        return this.frame1.classList.contains("danmu-animation-1")? this.frame1 : this.frame2;
+    getFrame() {
+        return this.frame1.classList.contains("danmu-animation-1") ? this.frame1 : this.frame2;
     }
 
     send(queue: DanmuItem[]) {
@@ -224,15 +232,16 @@ class CommonLayer extends Layer {
     }
 
     createFrames(wrapper: HTMLElement) {
-        const { duration, slideRatio } = this.option;
+        const { duration, slideRatio, id , zIndex} = this.option;
         const frame1: HTMLDivElement = document.createElement("div");
         frame1.className = "danmu-frame danmu-frame-common";
-        frame1.style.animationDuration = duration * 2 + "ms";
-        frame1.id = "frames_frame1";
+        frame1.style.animationDuration = (duration * slideRatio) / 2 + "ms";
+        frame1.id = id + "_frames_frame1";
+        frame1.style.zIndex = zIndex + 1 + "";
         const frame2 = frame1.cloneNode() as HTMLDivElement;
-        frame2.style.animationDuration = duration * 2 + "ms";
-        frame2.id = "frames_frame2";
-
+        frame2.style.animationDuration = (duration * slideRatio) / 2 + "ms";
+        frame2.id = id + "_frames_frame2";
+        frame2.style.zIndex = zIndex +  "";
         if (slideRatio) {
             const rate = Math.max(MIN_SLIDE_LENGTH, slideRatio);
             frame1.style.width = `${rate * 100}%`;
@@ -342,7 +351,7 @@ class CommonLayer extends Layer {
     }
 
     resgisterAnimationEvents() {
-        const { frame1, frame2 } = this;
+        const { frame1, frame2, option } = this;
         this.frame1.addEventListener("animationend", (ev: AnimationEvent) => {
             switch (ev.animationName) {
                 case "animation-stage-1":
@@ -351,8 +360,8 @@ class CommonLayer extends Layer {
                     frame1.classList.add("danmu-animation-2");
                     frame2.classList.add("danmu-animation-1");
 
-                    frame1.style.zIndex = "11";
-                    frame2.style.zIndex = "10";
+                    frame1.style.zIndex = option.zIndex + 1 + "";
+                    frame2.style.zIndex = option.zIndex + "";
                     this.traceManager.increasePeriod();
                     break;
                 case "animation-stage-2":
@@ -372,8 +381,8 @@ class CommonLayer extends Layer {
                     frame2.classList.add("danmu-animation-2");
                     frame1.classList.add("danmu-animation-1");
 
-                    frame2.style.zIndex = "11";
-                    frame1.style.zIndex = "10";
+                    frame2.style.zIndex = option.zIndex + 1 + "";
+                    frame1.style.zIndex = option.zIndex + "";
                     this.traceManager.increasePeriod();
                     break;
                 case "animation-stage-2":

@@ -60,11 +60,16 @@ export class DanmuManager {
             optionArr = [option];
         }
 
-        optionArr.forEach(opt => {
-            const layer = new CommonLayer(container);
-            layer.init(opt);
-            this.layers.push(layer);
-        });
+        optionArr
+            .map((opt, index) => {
+                if (opt.zIndex == null) {
+                    opt.zIndex = index * 2;
+                }
+                const layer = new CommonLayer(container);
+                layer.init(Object.assign({}, opt, { id: index }));
+                return layer;
+            })
+            .forEach((layer: Layer) => this.layers.push(layer));
     }
 
     start() {

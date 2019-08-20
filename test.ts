@@ -13,28 +13,28 @@ manager = getManager();
 (window as any).manager = manager;
 manager.init(containerEl, [
     {
-        duration: 5000,
+        duration: 10000,
         slideRatio: 3,
         useMeasure: true
     },
     {
-        duration: 4000,
+        duration: 6000,
         slideRatio: 3,
         useMeasure: true
-    }   
+    }
 ]);
 manager.start();
 let ticket = 0;
 
 const pools = [
-    { content: "完结撒花完结撒花完结撒花", style: "color:Red",duration: 3000 },
-    { content: "25.5啥的也算一级", style: "color:green", duration: 4000 },
-    {
-        forceDetect: true,
-        duration:5000, 
-        content:
-            "<img src='//static.hdslb.com/images/member/noface.gif' style='height:20px;vertical-align: middle;'>留下jo印留下jo印留下jo印"
-    }
+    { content: "完结撒花完结撒花完结撒花", style: "color:Red", duration: 6000 },
+    { content: "25.5啥的也算一级", style: "color:green", duration: 10000 }
+    // {
+    //     forceDetect: true,
+    //     duration:5000,
+    //     content:
+    //         "<img src='//static.hdslb.com/images/member/noface.gif' style='height:20px;vertical-align: middle;'>留下jo印留下jo印留下jo印"
+    // }
     // {  duration:5000, render: "高价回收天堂之眼，不要问我为什么" },
     // {
     //     render: ({ left, top }) => {
