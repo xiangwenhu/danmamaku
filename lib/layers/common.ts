@@ -1,4 +1,4 @@
-import { measureElement, get2DTranslate } from "../util";
+import { get2DTranslate } from "../util";
 import Layer from "./layer";
 import TraceManager from "../traceManager";
 import { DanmuItem } from "../index";
@@ -23,6 +23,16 @@ const DEFAULT_OPTION = {
 
 const DEFAULT_DANMU_CLASS = "danmu-item";
 const MIN_SLIDE_LENGTH = 2.5;
+const ANIMATION_STAGE1_CLASS = "danmu-animation-1";
+const ANIMATION_STAGE2_CLASS = "danmu-animation-2";
+const ANIMATION_STAGE1_NAME = 'animation-stage-1';
+const ANIMATION_STAGE2_NAME = 'animation-stage-2';
+
+
+enum animationPlayState{
+    paused = "paused",
+    running = "running"
+}
 
 class CommonLayer extends Layer {
     private frame1: HTMLDivElement;
@@ -30,6 +40,7 @@ class CommonLayer extends Layer {
     private sample: HTMLDivElement;
     private HEIGHT: number;
     private WIDTH: number;
+    private initialWidth: number;
     private animatingTime: number;
     private rect: ClientRect;
     public option: CommonLayerOption;
@@ -44,6 +55,7 @@ class CommonLayer extends Layer {
         this.rect = container.getBoundingClientRect();
         this.HEIGHT = container.clientHeight;
         this.WIDTH = container.clientWidth;
+        this.initialWidth = this.WIDTH;
         this.type = "common";
     }
 
@@ -56,7 +68,8 @@ class CommonLayer extends Layer {
         this.option = Object.assign({}, DEFAULT_OPTION, option);
         this.createFrames(this.container);
         this.recycle();
-        const traceHeight = this.getTraceHeight(DEFAULT_DANMU_CLASS);
+        this.getBaseMeasure(DEFAULT_DANMU_CLASS);
+        const traceHeight =  this.baseMeasure.outerHeight + this.baseMeasure.height;;
         this.traceManager = new TraceManager({
             height: HEIGHT,
             width: (WIDTH * this.option.slideRatio) / 2,
@@ -64,20 +77,26 @@ class CommonLayer extends Layer {
         });
     }
 
-    resize(option: CommonLayerOption) {
-        const { container } = this;
+    resize() {
+        const { container, option } = this;
         window.getComputedStyle(container).height;
         this.rect = container.getBoundingClientRect();
         this.HEIGHT = container.clientHeight;
         this.WIDTH = container.clientWidth;
-        const traceHeight = this.getTraceHeight(DEFAULT_DANMU_CLASS);
+        this.getBaseMeasure(DEFAULT_DANMU_CLASS);
+        const traceHeight =  this.baseMeasure.outerHeight + this.baseMeasure.height;;
         this.traceManager.resize({
             height: this.HEIGHT,
             width: (this.WIDTH * this.option.slideRatio) / 2,
             traceHeight
         });
-        this.frame2.style.animationDuration = (option.duration * option.slideRatio) / 2 + "ms";
-        this.frame1.style.animationDuration = (option.duration * option.slideRatio) / 2 + "ms";
+
+        const newDuration =
+            ((this.WIDTH / this.initialWidth) * (option.duration * option.slideRatio)) / 2;
+
+        console.log('newDuration', newDuration);
+        this.frame2.style.animationDuration = newDuration + "ms";
+        this.frame1.style.animationDuration = newDuration + "ms";
         // TODO:: 计算
         this.animatingTime = Date.now();
 
@@ -86,14 +105,14 @@ class CommonLayer extends Layer {
 
     start() {
         if (
-            this.frame1.classList.contains("danmu-animation-1") ||
-            this.frame2.classList.contains("danmu-animation-1")
+            this.frame1.classList.contains(ANIMATION_STAGE1_CLASS) ||
+            this.frame2.classList.contains(ANIMATION_STAGE1_CLASS)
         ) {
             console.log("already started...");
             return;
         }
 
-        this.frame1.classList.add("danmu-animation-1");
+        this.frame1.classList.add(ANIMATION_STAGE1_CLASS);
         this.animatingTime = Date.now();
         this.status = 1;
         this.traceManager.reset();
@@ -104,13 +123,13 @@ class CommonLayer extends Layer {
         this.clearTicket && clearInterval(this.clearTicket);
 
         if (this.frame1) {
-            this.frame1.classList.remove("danmu-animation-1", "danmu-animation-2");
+            this.frame1.classList.remove(ANIMATION_STAGE1_CLASS, ANIMATION_STAGE2_CLASS);
             this.frame1.innerHTML = "";
             // 复位
             this.frame1.getBoundingClientRect();
         }
         if (this.frame2) {
-            this.frame2.classList.remove("danmu-animation-1", "danmu-animation-2");
+            this.frame2.classList.remove(ANIMATION_STAGE1_CLASS, ANIMATION_STAGE2_CLASS);
             this.frame2.innerHTML = "";
             // 复位
             this.frame2.getBoundingClientRect();
@@ -121,11 +140,11 @@ class CommonLayer extends Layer {
         if (!this.frame1) {
             return;
         }
-        this.frame1.style.animationPlayState = "paused";
+        this.frame1.style.animationPlayState = animationPlayState.paused;
         if (!this.frame2) {
             return;
         }
-        this.frame2.style.animationPlayState = "paused";
+        this.frame2.style.animationPlayState = animationPlayState.paused;
         this.pausedTime = Date.now();
         this.status = 2;
     }
@@ -134,11 +153,11 @@ class CommonLayer extends Layer {
         if (!this.frame1) {
             return;
         }
-        this.frame1.style.animationPlayState = "running";
+        this.frame1.style.animationPlayState = animationPlayState.running;
         if (!this.frame2) {
             return;
         }
-        this.frame2.style.animationPlayState = "running";
+        this.frame2.style.animationPlayState = animationPlayState.running;
         this.animatingTime += Date.now() - this.pausedTime;
         this.pausedTime = 0;
         this.status = 1;
@@ -180,7 +199,7 @@ class CommonLayer extends Layer {
     }
 
     getFrame() {
-        return this.frame1.classList.contains("danmu-animation-1") ? this.frame1 : this.frame2;
+        return this.frame1.classList.contains(ANIMATION_STAGE1_CLASS) ? this.frame1 : this.frame2;
     }
 
     send(queue: DanmuItem[]) {
@@ -232,7 +251,7 @@ class CommonLayer extends Layer {
     }
 
     createFrames(wrapper: HTMLElement) {
-        const { duration, slideRatio, id , zIndex} = this.option;
+        const { duration, slideRatio, id, zIndex } = this.option;
         const frame1: HTMLDivElement = document.createElement("div");
         frame1.className = "danmu-frame danmu-frame-common";
         frame1.style.animationDuration = (duration * slideRatio) / 2 + "ms";
@@ -241,7 +260,7 @@ class CommonLayer extends Layer {
         const frame2 = frame1.cloneNode() as HTMLDivElement;
         frame2.style.animationDuration = (duration * slideRatio) / 2 + "ms";
         frame2.id = id + "_frames_frame2";
-        frame2.style.zIndex = zIndex +  "";
+        frame2.style.zIndex = zIndex + "";
         if (slideRatio) {
             const rate = Math.max(MIN_SLIDE_LENGTH, slideRatio);
             frame1.style.width = `${rate * 100}%`;
@@ -306,7 +325,7 @@ class CommonLayer extends Layer {
     recycle() {
         const { checkPeriod } = this.option;
         this.clearTicket = setInterval(() => {
-            const frame = document.querySelector(".danmu-animation-2");
+            const frame = document.querySelector("." + ANIMATION_STAGE2_CLASS);
             if (!frame) {
                 return;
             }
@@ -354,19 +373,19 @@ class CommonLayer extends Layer {
         const { frame1, frame2, option } = this;
         this.frame1.addEventListener("animationend", (ev: AnimationEvent) => {
             switch (ev.animationName) {
-                case "animation-stage-1":
+                case ANIMATION_STAGE1_NAME:
                     this.animatingTime = Date.now();
-                    frame1.classList.remove("danmu-animation-1");
-                    frame1.classList.add("danmu-animation-2");
-                    frame2.classList.add("danmu-animation-1");
+                    frame1.classList.remove(ANIMATION_STAGE1_CLASS);
+                    frame1.classList.add(ANIMATION_STAGE2_CLASS);
+                    frame2.classList.add(ANIMATION_STAGE1_CLASS);
 
                     frame1.style.zIndex = option.zIndex + 1 + "";
                     frame2.style.zIndex = option.zIndex + "";
                     this.traceManager.increasePeriod();
                     break;
-                case "animation-stage-2":
+                case ANIMATION_STAGE2_NAME:
                     this.clearDanmus(frame1);
-                    frame1.classList.remove("danmu-animation-2");
+                    frame1.classList.remove(ANIMATION_STAGE2_CLASS);
                     break;
                 default:
                     break;
@@ -375,19 +394,19 @@ class CommonLayer extends Layer {
 
         frame2.addEventListener("animationend", (ev: AnimationEvent) => {
             switch (ev.animationName) {
-                case "animation-stage-1":
+                case ANIMATION_STAGE1_NAME:
                     this.animatingTime = Date.now();
-                    frame2.classList.remove("danmu-animation-1");
-                    frame2.classList.add("danmu-animation-2");
-                    frame1.classList.add("danmu-animation-1");
+                    frame2.classList.remove(ANIMATION_STAGE1_CLASS);
+                    frame2.classList.add(ANIMATION_STAGE2_CLASS);
+                    frame1.classList.add(ANIMATION_STAGE1_CLASS);
 
                     frame2.style.zIndex = option.zIndex + 1 + "";
                     frame1.style.zIndex = option.zIndex + "";
                     this.traceManager.increasePeriod();
                     break;
-                case "animation-stage-2":
+                case ANIMATION_STAGE2_NAME:
                     this.clearDanmus(frame2);
-                    frame2.classList.remove("danmu-animation-2");
+                    frame2.classList.remove(ANIMATION_STAGE2_CLASS);
                     break;
                 default:
                     break;

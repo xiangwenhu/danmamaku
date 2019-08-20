@@ -29,10 +29,9 @@ export default abstract class Layer {
 
     abstract send(items: DanmuItem[]): void;
 
-    getTraceHeight(className, tagName: string = "div") {
+    getBaseMeasure(className, tagName: string = "div"){
         this.baseMeasure = measureElement(tagName, className, this.container);
-        return this.baseMeasure.outerHeight + this.baseMeasure.height;
-    }
+    } 
 
     remove(itemId: string | number) {
         const el = this.container.querySelector(`[danmu-id='${itemId}']`);

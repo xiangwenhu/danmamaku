@@ -18,7 +18,12 @@ manager.init(containerEl, [
         useMeasure: true
     },
     {
-        duration: 6000,
+        duration: 7000,
+        slideRatio: 3,
+        useMeasure: true
+    },
+    {
+        duration: 5000,
         slideRatio: 3,
         useMeasure: true
     }
@@ -27,8 +32,8 @@ manager.start();
 let ticket = 0;
 
 const pools = [
-    { content: "完结撒花完结撒花完结撒花", style: "color:Red", duration: 6000 },
-    { content: "25.5啥的也算一级", style: "color:green", duration: 10000 }
+    { content: "完结撒花完结撒花完结撒花", style: "color:Red", duration: 10000 },
+    { content: "25.5啥的也算一级", style: "color:blue", duration: 7000 },
     // {
     //     forceDetect: true,
     //     duration:5000,
@@ -57,10 +62,11 @@ const pools = [
     // "这个女的好帅啊，一拳一个机器人的那个",
     // "哇喔哇喔哇喔哇喔好燃啊！！！",
     // "黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴黑琴",
-    // {
-    //     content: "子弹是金属，枪也是金属，炮姐直接操控啊",
-    //     style: "border:solid 1px blue"
-    // }
+    {
+        content: "子弹是金属，枪也是金属，炮姐直接操控啊",
+        style: "color:yellow",
+        duration: 5000
+    }
 ];
 
 function getRandomIndex(len: number) {
@@ -153,15 +159,13 @@ const { left, width } = rect;
 const right = left + width;
 setInterval(function() {
     (window as any).requestIdleCallback(() => {
-        const allItems = Array.from(document.querySelectorAll(".danmu-item"));
+        let startTime = performance.now();
+        const allItems = Array.from(containerEl.querySelectorAll(".danmu-item"));
 
-        const commonItems = Array.from(
-            document.querySelectorAll(".danmu-item:not(.danmu-item-acc)")
-        );
         const accCount = document.querySelectorAll(".danmu-item-acc").length;
         const len = allItems.length;
         const inHideLen = allItems.filter(item => item.classList.contains("hide")).length;
-        const inViewLen = commonItems.filter(function(item) {
+        const inViewLen = allItems.filter(function(item) {
             const rect = item.getBoundingClientRect();
             const b = !item.classList.contains("hide") && rect.left + rect.width >= left;
             return b;
@@ -169,7 +173,7 @@ setInterval(function() {
 
         lbTotal.innerText = len + "-" + accCount;
         lbHide.innerHTML = inHideLen + "";
-        lbInView.innerHTML = inViewLen + "";
+        lbInView.innerHTML = inViewLen + " (本次统计耗时" + (performance.now() - startTime).toFixed(2) + "ms)";
     });
 }, 5000);
 
