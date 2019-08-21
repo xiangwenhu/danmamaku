@@ -18,7 +18,7 @@ const DEFAULT_OPTION = {
     duration: 10000,
     checkPeriod: 1000,
     useMeasure: false,
-    slideRatio: 4
+    slideRatio: 3
 };
 
 const DEFAULT_DANMU_CLASS = "danmu-item";

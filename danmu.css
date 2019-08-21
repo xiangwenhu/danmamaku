@@ -12,14 +12,14 @@
     /* opacity: 0.8; */
 }
 
-.slide-danmu .danmu-frame-common{
+.slide-danmu .danmu-frame-common {
     width: 400%;
     left: 100%;
 }
 
-.slide-danmu .danmu-frame-acc{
-   width: 100%;
-   z-index: 21;
+.slide-danmu .danmu-frame-acc {
+    width: 100%;
+    z-index: 21;
 }
 
 .slide-danmu .danmu-frame:nth-child(1) {
@@ -29,7 +29,6 @@
 .slide-danmu .danmu-frame:nth-child(2) {
     z-index: 10;
 }
-
 
 .slide-danmu .danmu-item {
     position: absolute;
@@ -50,9 +49,9 @@
     user-select: none;
 }
 
-.slide-danmu .danmu-item-acc{
+.slide-danmu .danmu-item-acc {
     /* animation-name: animation-acc; */
-    animation-duration:10s;
+    animation-duration: 10s;
     animation-timing-function: linear;
     animation-delay: 0ms;
     animation-fill-mode: forwards;
@@ -89,120 +88,22 @@
     }
 }
 
-@keyframes animation-acc {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-200%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-110 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-110%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-120 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-120%, 0, 0);
-    }
-}
-
-
-@keyframes animation-acc-130 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-130%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-140 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-140%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-150 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-150%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-160 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-160%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-170 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-170%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-180 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-180%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-190 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-190%, 0, 0);
-    }
-}
-
-@keyframes animation-acc-200 {
-    from {
-        transform: translate3d(0, 0, 0);
-    }
-    to {
-        transform: translate3d(-200%, 0, 0);
-    }
-}
-
 .slide-danmu .hide {
     display: none;
 }
 
-
-.inline-block{
+.inline-block {
     display: inline-block;
 }
 
-.block{
+.block {
     display: block;
 }
 
-.fullWidth{
+.fullWidth {
     width: 100%;
 }
 
+.danmu-frame-common:nth-child(1) .danmu-item{
+    color: red;
+}
