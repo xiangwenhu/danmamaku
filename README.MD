@@ -1,7 +1,6 @@
 ## 基本思路
 1. 只有Slide Frame模式
 2. 可以初始化多个Slide Frame模式的层
-3. 共用TraceManager
 
 
 
